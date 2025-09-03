@@ -6,6 +6,8 @@ const { errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
 
+require("dotenv").config();
+
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
