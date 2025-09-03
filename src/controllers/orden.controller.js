@@ -3,22 +3,22 @@ const { CarroItem, Producto, Orden, OrdenItem, sequelize } = require('../models'
 exports.CrearOrden = async (req, res) => {
     const t = await sequelize.transaction();
     try {
-        const carroItems = await CarroItem.findAll({ where: { Id_Usuario: req.user.id }, include: [Producto], transaction: t });
+        const carroItems = await CarroItem.findAll({ where: { Id_Usuario: req.user.Id_Usuario }, include: [Producto], transaction: t });
         if (!carroItems.length) {
         await t.rollback();
         return res.status(400).json({ message: 'Carrito vacío' });
         }
 
-        let total = 0;
+        let Total = 0;
         for (const p of carroItems) {
         if (p.Cantidad > p.Producto.Stock) {
             await t.rollback();
-            return res.status(400).json({ message: `Stock insufipente para ${p.Producto.Nombre}` });
+            return res.status(400).json({ message: `Stock insuficiente para ${p.Producto.Nombre}` });
         }
-        total += parseFloat(p.Producto.Precio) * p.Cantidad;
+        Total += parseFloat(p.Producto.Precio) * p.Cantidad;
         }
 
-        const orden = await Orden.create({ Id_Usuario: req.user.id, total }, { transaction: t });
+        const orden = await Orden.create({ Id_Usuario: req.user.Id_Usuario, Total }, { transaction: t });
 
         for (const p of carroItems) {
         await OrdenItem.create({
@@ -32,7 +32,7 @@ exports.CrearOrden = async (req, res) => {
         await p.Producto.save({ transaction: t });
         }
 
-        await CarroItem.destroy({ where: { Id_Usuario: req.user.id }, transaction: t });
+        await CarroItem.destroy({ where: { Id_Usuario: req.user.Id_Usuario }, transaction: t });
 
         await t.commit();
         res.status(201).json({ Id_Orden: orden.Id_Orden });
@@ -44,10 +44,10 @@ exports.CrearOrden = async (req, res) => {
 };
 
 exports.ObtenerOrdenes = async (req, res) => {
-    const ordens = await Orden.findAll({
-        where: { Id_Usuario: req.user.id },
+    const ordenes = await Orden.findAll({
+        where: { Id_Usuario: req.user.Id_Usuario },
         include: [{ model: OrdenItem, include: [Producto] }],
-        orden: [['createdAt', 'DESC']]
+        order: [['createdAt', 'DESC']]
     });
-    res.json(ordens);
+    res.json(ordenes);
 };

@@ -6,7 +6,7 @@ exports.listarProductos = async (req, res) => {
 };
 
 exports.ObtenerProductoPorId = async (req, res) => {
-    const producto = await Producto.findByPk(req.params.id);
+    const producto = await Producto.findByPk(req.params.Id_Producto);
     if (!producto) return res.status(404).json({ message: 'Producto no encontrado' });
     res.json(producto);
 };
@@ -18,14 +18,14 @@ exports.CrearProducto = async (req, res) => {
 };
 
 exports.ActualizarProducto = async (req, res) => {
-    const producto = await Producto.findByPk(req.params.id);
+    const producto = await Producto.findByPk(req.params.Id_Producto);
     if (!producto) return res.status(404).json({ message: 'Producto no encontrado' });
     await producto.update(req.body);
     res.json(producto);
 };
 
 exports.EliminarProducto = async (req, res) => {
-    const producto = await Producto.findByPk(req.params.id);
+    const producto = await Producto.findByPk(req.params.Id_Producto);
     if (!producto) return res.status(404).json({ message: 'Producto no encontrado' });
     await producto.destroy();
     res.json({ message: 'Eliminado' });

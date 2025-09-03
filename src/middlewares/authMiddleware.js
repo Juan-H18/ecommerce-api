@@ -12,7 +12,7 @@ async function authMiddleware(req, res, next) {
     try {
         const payload = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await Usuario.findByPk(payload.id);
+        const user = await Usuario.findByPk(payload.Id_Usuario);
 
         if (!user) return res.status(401).json({ message: 'Este Usuario no existe' });
 
