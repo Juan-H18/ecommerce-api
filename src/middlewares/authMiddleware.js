@@ -1,27 +1,31 @@
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
-const { Usuario } = require('../models');
+const jwt = require("jsonwebtoken");
+const { Usuario } = require("../models");
+require("dotenv").config();
 
-async function authMiddleware(req, res, next) {
+const authMiddleware = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ message: 'No se proporciono el token' });
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ message: "Token no proporcionado" });
+    }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
 
     try {
-        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        const user = await Usuario.findByPk(payload.Id_Usuario);
+        const usuario = await Usuario.findByPk(decoded.Id_Usuario, {
+        attributes: ["Id_Usuario", "Nombre", "Correo"],
+        });
 
-        if (!user) return res.status(401).json({ message: 'Este Usuario no existe' });
+        if (!usuario) return res.status(401).json({ message: "Usuario no válido" });
 
-        req.user = user;
-
+        req.user = usuario;
         next();
     } catch (err) {
-        return res.status(401).json({ message: 'Token inválido' });
+        console.error(err);
+        res.status(401).json({ message: "Token inválido o expirado" });
     }
-}
+};
 
 module.exports = authMiddleware;
