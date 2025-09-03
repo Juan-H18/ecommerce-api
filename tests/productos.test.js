@@ -20,14 +20,15 @@ describe("Productos API", () => {
 
         // Loguear y obtener token
         const login = await request(app)
-            .post("/api/usuarios/login")
+            .post("/api/auth/login")
             .send({ Correo: "tester@test.com", Password: "123456" });
 
         token = login.body.token;
     });
 
     afterAll(async () => {
-        await sequelize.close();
+        // No cerrar la conexión, solo limpiar datos si es necesario
+        // La conexión se mantiene activa para otros tests
     });
 
     test("Debe crear un producto nuevo", async () => {
@@ -90,7 +91,7 @@ describe("Productos API", () => {
 
         expect(res.statusCode).toBe(200);
         expect(res.body.Nombre).toBe("Camiseta Actualizada");
-        expect(res.body.Precio).toBe("39.99"); // Sequelize devuelve DECIMAL como string
+        expect(res.body.Precio).toBe(39.99); // Sequelize puede devolver DECIMAL como número
     });
 
     test("Debe devolver 404 al intentar actualizar producto inexistente", async () => {
